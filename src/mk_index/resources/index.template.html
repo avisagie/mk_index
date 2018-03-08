@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Videos</title>
+<meta charset="UTF-8">
+<style>
+body {
+    font-family: Calibri, Arial, sans;
+}
+
+li.folder {
+    margin-top: 1ex;
+    margin-bottom: 1ex;
+    list-style: none;
+}
+
+.foldername {
+    font-size: 1.2em;
+    font-weight: bold;    
+}
+
+li.file {
+    list-style: none;
+}
+
+</style>
+</head>
+<body>
+
+{{ define "directory" }}
+    {{ range .Files }}
+        <li class="file"> <a href="{{.Link}}"> {{.Name}} </a> </li> 
+    {{ end }}
+    {{ if (len .Directories) gt 0 }} {{ range .Directories }}
+        <li class="folder"> <span class="foldername">{{ .Name }}</span>
+            <ol>
+                {{ template "directory" . }}
+            </ol>
+        </li> 
+    {{ end }} {{ end }}
+{{ end }}
+
+<ol id="root">
+{{ template "directory" . }}
+</ol>
+
+    <script src="jquery-3.3.1.min.js"></script>
+    <script>
+    $("span.foldername").click(function(e) {
+        $(this).parent().children("ol").toggle(200);
+    });
+    </script>
+</body>
+</html>
