@@ -13,7 +13,6 @@ import (
 	"github.com/gobuffalo/packr"
 )
 
-
 type Directory struct {
 	Path        string
 	Name        string
@@ -59,14 +58,6 @@ func recurse(path string) Directory {
 	return ret
 }
 
-func dumpIcons() {
-	box := packr.NewBox("./resources")
-	for _, name := range []string{"jquery-3.3.1.min.js"} {
-		bytes := box.Bytes(name)
-		ioutil.WriteFile(name, bytes, 0644)
-	}
-}
-
 func main() {
 	directories := recurse(".")
 
@@ -74,16 +65,14 @@ func main() {
 	if err != nil {
 		log.Panic("Could not open index.html for writing. ", err)
 	}
-	defer outf.Close()
+	defer outf.Close()	
 
 	box := packr.NewBox("./resources")
-
+	
 	index_html := box.String("index.template.html")
 	t := template.Must(template.New("index.html").Parse(index_html))
 	err = t.Execute(outf, directories)
 	if err != nil {
 		log.Panic("Could not execute template", err)
 	}
-
-	dumpIcons()
 }
