@@ -23,16 +23,26 @@ li.file {
     list-style: none;
 }
 
+.action {
+    font-weight: bold;
+    cursor: pointer;
+}
+
 </style>
 </head>
 <body>
+
+  <p>
+    <span id="expand" class="action">expand</span> /
+    <span id="collapse" class="action">collapse</span> all
+  </p>
 
 {{ define "directory" }}
     {{ range .Files }}
         <li class="file"> <a href="{{.Link}}"> {{.Name}} </a> </li> 
     {{ end }}
     {{ if (len .Directories) gt 0 }} {{ range .Directories }}
-        <li class="folder"> <span class="foldername">{{ .Name }}</span>
+        <li class="folder"> <span class="foldername action">{{ .Name }}</span>
             <ol>
                 {{ template "directory" . }}
             </ol>
@@ -48,6 +58,14 @@ li.file {
     <script>
     $("span.foldername").click(function(e) {
         $(this).parent().children("ol").toggle(200);
+    });
+
+    $("#expand").click(function(e) {
+        $("#root").find("ol").show();
+    });
+
+    $("#collapse").click(function(e) {
+        $("#root").find("ol").hide();
     });
     </script>
 </body>
