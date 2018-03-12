@@ -34,7 +34,8 @@ li.file {
 
   <p>
     <span id="expand" class="action">+ expand</span> /
-    <span id="collapse" class="action">- collapse</span>
+    <span id="collapse" class="action">- collapse</span> / 
+    <input id="searchInput" type="text"> <button id="searchButton">search</button>
   </p>
 
 {{ define "directory" }}
@@ -60,6 +61,8 @@ li.file {
 </script>
 
     <script>
+    "use strict";
+
     $("span.foldername").click(function(e) {
         $(this).parent().children("ol").toggle(200);
     });
@@ -71,6 +74,14 @@ li.file {
     $("#collapse").click(function(e) {
         $("#root").find("ol").hide();
     });
+
+    $("#root").find("ol").hide();
+
+    $("#searchButton").click(function() {
+        let inp = $("#searchInput").val();
+        console.log("searching for " + inp);
+    })
+
     </script>
 </body>
 </html>
