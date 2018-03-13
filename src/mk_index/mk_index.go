@@ -8,6 +8,7 @@ import (
 	"html"
 	"html/template"
 	"strings"
+	"io"
 	P "path"
 	
 	"github.com/gobuffalo/packr"
@@ -32,7 +33,7 @@ func clean(p string) string {
 	return url.PathEscape(p)
 }
 
-func recurse(path string) Directory {
+func Recurse(path string) Directory {
 	ret := Directory{
 		path,
 		P.Base(path),
@@ -47,7 +48,7 @@ func recurse(path string) Directory {
 
 	for _, f := range files {
 		if f.Mode().IsDir() {
-			ret.Directories = append(ret.Directories, recurse(path + "/" + f.Name()))
+			ret.Directories = append(ret.Directories, Recurse(path + "/" + f.Name()))
 		} else if f.Mode().IsRegular() {
 			ret.Files = append(ret.Files, Link{
 				Link: clean(path + "/" + f.Name()),
@@ -58,8 +59,20 @@ func recurse(path string) Directory {
 	return ret
 }
 
+func Render(directories Directory, outf io.Writer) error {
+	box := packr.NewBox("./resources")
+	index_html := box.String("index.template.html")
+	t := template.Must(template.New("index.html").Parse(index_html))
+	err := t.Execute(outf, directories)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+	
+
 func main() {
-	directories := recurse(".")
+	directories := Recurse(".")
 
 	outf, err := os.Create("index.html")
 	if err != nil {
@@ -67,12 +80,8 @@ func main() {
 	}
 	defer outf.Close()	
 
-	box := packr.NewBox("./resources")
-	
-	index_html := box.String("index.template.html")
-	t := template.Must(template.New("index.html").Parse(index_html))
-	err = t.Execute(outf, directories)
+	err = Render(directories, outf)
 	if err != nil {
-		log.Panic("Could not execute template", err)
+		log.Panic(err)
 	}
 }
