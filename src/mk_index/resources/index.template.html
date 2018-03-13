@@ -75,12 +75,30 @@ li.file {
         $("#root").find("ol").hide();
     });
 
-    $("#root").find("ol").hide();
-
-    $("#searchButton").click(function() {
+    let searchFun = function() {
+        // First collapse everything
+        $("#root").find("ol").hide();
+ 
+        // Then search and show everything that matched. Folders or
+        // files.
         let inp = $("#searchInput").val();
-        console.log("searching for " + inp);
-    })
+        let re = new RegExp(inp);
+        
+        $("li.file > a,li.folder > span").each(function() { 
+            let text = $(this).text().trim();
+            let m = re.exec(text);
+            if (m) {
+	        $(this).parents("ol").show();
+	    }
+        });
+    };
+
+    $("#searchButton").click(searchFun);
+    $("#searchInput").keypress(function(e){
+        if (e.key === 'Enter') {
+            searchFun();
+        }
+    });
 
     </script>
 </body>
