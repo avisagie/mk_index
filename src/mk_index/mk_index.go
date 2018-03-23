@@ -7,7 +7,6 @@ import (
 	"net/url"
 	"html"
 	"html/template"
-	"strings"
 	"io"
 	P "path"
 	
@@ -24,13 +23,6 @@ type Directory struct {
 type Link struct {
 	Name string
 	Link string
-}
-
-func clean(p string) string {
-	if (strings.HasPrefix(p, "./")) {
-		return url.PathEscape(p[2:])
-	}
-	return url.PathEscape(p)
 }
 
 func Recurse(path string) Directory {
@@ -51,7 +43,7 @@ func Recurse(path string) Directory {
 			ret.Directories = append(ret.Directories, Recurse(path + "/" + f.Name()))
 		} else if f.Mode().IsRegular() {
 			ret.Files = append(ret.Files, Link{
-				Link: clean(path + "/" + f.Name()),
+				Link: path + "/" + url.PathEscape(f.Name()),
 				Name: html.EscapeString(f.Name()),
 			})
 		}
