@@ -7,23 +7,19 @@ import (
 	"flag"
 	"net"
 	"os"
+	"fmt"
 )
 
 var (
 	listenAddr = flag.String("addr", ":8080", "Address to listen on")
+	cacheMaxAge = flag.Int("max-age", 60, "Seconds to allow caching of resources on the client side")
 )
 
 func init() {
 	flag.Parse()
 }
 
-func main() {
-	h := http.FileServer(http.Dir("./"))
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Printf("%s -> %s", r.RemoteAddr, r.URL.String())
-		h.ServeHTTP(w, r)
-	})
-	
+func printAddresses(port string) {
 	// Print this machine's interface addresses
 	ifaces, err := net.Interfaces()
 	if err != nil {
@@ -37,11 +33,41 @@ func main() {
 			log.Printf("%02d: %s (%s)", i, iface.Name, iface.Flags) 
 			addrs, err := iface.Addrs()
 			if err == nil {
-				for j, a := range addrs {
-					log.Printf("  :%02d %s - %s", j, a.Network(), a)
+				for _, a := range addrs {
+					var ip net.IP
+					switch v := a.(type) {
+					case *net.IPNet:
+						ip = v.IP
+					case *net.IPAddr:
+						ip = v.IP
+					}
+					log.Printf("      http://%s/", net.JoinHostPort(ip.String(), port))
 				}
 			}
 		}
+	}
+}
+
+func main() {
+	maxAge := fmt.Sprintf("max-age=%d", *cacheMaxAge)
+
+	h := http.FileServer(http.Dir("./"))
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s -> %s", r.RemoteAddr, r.URL.String())
+		w.Header().Set("Cache-Control", maxAge)
+		h.ServeHTTP(w, r)
+	})
+
+	listenHost, listenPort, err := net.SplitHostPort(*listenAddr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	
+	if len(listenHost) == 0 {
+		printAddresses(listenPort)
+	} else {
+		log.Printf("Listening on http://%s/", *listenAddr)
 	}
 
 	// whereami?
@@ -51,8 +77,7 @@ func main() {
 		cwd = ""
 	}
 	
-	
 	// start serving
-	log.Printf("Listening on %s, serving in %s", *listenAddr, cwd)
+	log.Printf("Serving in %s", cwd)
 	log.Fatal(http.ListenAndServe(*listenAddr, nil))
 }
