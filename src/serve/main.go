@@ -13,6 +13,8 @@ import (
 var (
 	listenAddr = flag.String("addr", ":8080", "Address to listen on")
 	cacheMaxAge = flag.Int("max-age", 60, "Seconds to allow caching of resources on the client side")
+	cert = flag.String("cert", "", "Certificate file for TLS. The concatenation of the certificates of the server all the way up to the CA's.")
+	key = flag.String("key", "", "Key file for TLS.")
 )
 
 func init() {
@@ -79,5 +81,9 @@ func main() {
 	
 	// start serving
 	log.Printf("Serving in %s", cwd)
-	log.Fatal(http.ListenAndServe(*listenAddr, nil))
+	if *key != "" && *cert != "" {
+		log.Fatal(http.ListenAndServeTLS(*listenAddr, *cert, *key, nil))
+	} else {
+		log.Fatal(http.ListenAndServe(*listenAddr, nil))
+	}
 }
