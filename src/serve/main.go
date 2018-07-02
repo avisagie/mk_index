@@ -1,20 +1,19 @@
-
 package main
 
 import (
-	"log"
-	"net/http"
 	"flag"
-	"net"
-	"os"
 	"fmt"
+	"log"
+	"net"
+	"net/http"
+	"os"
 )
 
 var (
-	listenAddr = flag.String("addr", ":8080", "Address to listen on")
+	listenAddr  = flag.String("addr", ":8080", "Address to listen on")
 	cacheMaxAge = flag.Int("max-age", 60, "Seconds to allow caching of resources on the client side")
-	cert = flag.String("cert", "", "Certificate file for TLS. The concatenation of the certificates of the server all the way up to the CA's.")
-	key = flag.String("key", "", "Key file for TLS.")
+	cert        = flag.String("cert", "", "Certificate file for TLS. The concatenation of the certificates of the server all the way up to the CA's.")
+	key         = flag.String("key", "", "Key file for TLS.")
 )
 
 func init() {
@@ -32,7 +31,7 @@ func printAddresses(port string) {
 				continue
 			}
 
-			log.Printf("%02d: %s (%s)", i, iface.Name, iface.Flags) 
+			log.Printf("%02d: %s (%s)", i, iface.Name, iface.Flags)
 			addrs, err := iface.Addrs()
 			if err == nil {
 				for _, a := range addrs {
@@ -65,7 +64,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	
 	if len(listenHost) == 0 {
 		printAddresses(listenPort)
 	} else {
@@ -78,7 +76,7 @@ func main() {
 		log.Println("Could not get current working directory:", err)
 		cwd = ""
 	}
-	
+
 	// start serving
 	log.Printf("Serving in %s", cwd)
 	if *key != "" && *cert != "" {
