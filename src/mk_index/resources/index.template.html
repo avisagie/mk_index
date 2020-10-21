@@ -42,13 +42,13 @@ li.file {
     {{ range .Files }}
         <li class="file"> <a href="{{.Link}}"> {{.Name}} </a> </li> 
     {{ end }}
-    {{ if (len .Directories) gt 0 }} {{ range .Directories }}
+    {{ range .Directories }}
         <li class="folder"> <span class="foldername action">{{ .Name }}</span>
             <ol>
                 {{ template "directory" . }}
             </ol>
         </li> 
-    {{ end }} {{ end }}
+    {{ end }}
 {{ end }}
 
 <ol id="root">
